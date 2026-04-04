@@ -199,16 +199,27 @@ div[data-testid="stMarkdownContainer"] strong { color: #f1f5f9 !important; }
 }
 
 /* ─ Streamlit form + input overrides ─ */
-.stTextInput > div > div > input,
-.stTextArea > div > div > textarea,
-.stDateInput > div > div > input {
+div[data-baseweb="input"] > div,
+div[data-baseweb="base-input"],
+div[data-baseweb="textarea"] > div,
+div[data-testid="stTextInput"] > div > div > div,
+div[data-testid="stTextArea"] > div > div > div {
+    background-color: transparent !important;
+    border: none !important;
+}
+
+div[data-testid="stTextInput"] input,
+div[data-testid="stTextArea"] textarea,
+div[data-testid="stDateInput"] input {
     -webkit-appearance: none !important;
     -moz-appearance: none !important;
     appearance: none !important;
+    background-color: rgba(255,255,255,0.05) !important;
     background: rgba(255,255,255,0.05) !important;
     border: 1px solid rgba(255,255,255,0.1) !important;
     border-radius: 10px !important;
     color: #f1f5f9 !important;
+    -webkit-text-fill-color: #f1f5f9 !important;
     padding: 0.6rem 0.85rem !important;
     line-height: 1.5 !important;
 }
