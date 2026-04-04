@@ -103,7 +103,7 @@ div[data-testid="stMarkdownContainer"] .hero p { font-size: 1.4rem !important; c
 /* ─ Portal Cards ─ */
 .portal-card {
     background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 24px; padding: 3rem 2.5rem; text-align: center;
+    border-radius: 24px; padding: clamp(1.5rem, 4vw, 3rem) clamp(1.5rem, 4vw, 2.5rem); text-align: center;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); backdrop-filter: blur(20px);
 }
 .portal-card.p-card:hover { border-color: rgba(0,212,255,0.45); box-shadow: 0 0 50px rgba(0,212,255,0.1); transform: translateY(-5px); }
@@ -202,6 +202,9 @@ div[data-testid="stMarkdownContainer"] strong { color: #f1f5f9 !important; }
 .stTextInput > div > div > input,
 .stTextArea > div > div > textarea,
 .stDateInput > div > div > input {
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
     background: rgba(255,255,255,0.05) !important;
     border: 1px solid rgba(255,255,255,0.1) !important;
     border-radius: 10px !important;
