@@ -267,6 +267,38 @@ div[data-testid="stDateInput"] input {
     white-space: nowrap !important;
 }
 [data-testid="stTabs"] [role="tab"][aria-selected="true"] { color: #00d4ff !important; }
+
+/* ─ Mobile Responsiveness ─ */
+@media screen and (max-width: 768px) {
+    [data-testid="stColumns"] {
+        flex-direction: column !important;
+        gap: 1.5rem !important;
+    }
+    [data-testid="stColumn"] {
+        min-width: 100% !important;
+        width: 100% !important;
+    }
+    div[data-testid="stMarkdownContainer"] .hero h1 {
+        font-size: clamp(2.2rem, 10vw, 3.5rem) !important;
+        line-height: 1.15 !important;
+    }
+    div[data-testid="stMarkdownContainer"] .hero p {
+        font-size: 1.05rem !important;
+    }
+    div[data-testid="stMarkdownContainer"] .hero {
+        padding: 1.5rem 0.5rem 1rem !important;
+    }
+    .portal-card {
+        padding: 2rem 1.5rem !important;
+    }
+    .brand {
+        font-size: 1.4rem !important;
+        white-space: normal !important;
+    }
+    .topbar {
+        padding: 0.75rem 1rem !important;
+    }
+}
 </style>
 """, unsafe_allow_html=True)
 
