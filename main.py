@@ -79,28 +79,32 @@ p, h1, h2, h3, h4, li {
     margin-bottom: 1rem;
 }
 .brand {
-    font-size: 1.4rem; font-weight: 800;
+    font-size: 1.8rem; font-weight: 800;
     background: linear-gradient(135deg, #00d4ff, #a855f7);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     white-space: nowrap;
+    text-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+    letter-spacing: -0.02em;
 }
 
 /* ─ Hero ─ */
 .hero { text-align: center; padding: 3.5rem 1rem 2.5rem; }
 .hero h1 {
-    font-size: clamp(2.2rem, 5vw, 4rem);
+    font-size: clamp(2.8rem, 6vw, 4.8rem);
     font-weight: 800; line-height: 1.2;
     background: linear-gradient(135deg, #00d4ff 20%, #a855f7 80%);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     margin-bottom: 0.75rem;
+    text-shadow: 0 0 30px rgba(168, 85, 247, 0.2);
+    letter-spacing: -0.03em;
 }
-.hero p { font-size: 1.1rem; color: #64748b; margin: 0; line-height: 1.6; }
+.hero p { font-size: 1.2rem; color: #94a3b8; margin: 0; line-height: 1.6; }
 
 /* ─ Portal Cards ─ */
 .portal-card {
     background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 24px; padding: 2.5rem 2rem; text-align: center;
-    transition: all 0.3s ease; backdrop-filter: blur(20px);
+    border-radius: 24px; padding: 3rem 2.5rem; text-align: center;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); backdrop-filter: blur(20px);
 }
 .portal-card.p-card:hover { border-color: rgba(0,212,255,0.45); box-shadow: 0 0 50px rgba(0,212,255,0.1); transform: translateY(-5px); }
 .portal-card.d-card:hover { border-color: rgba(168,85,247,0.45); box-shadow: 0 0 50px rgba(168,85,247,0.1); transform: translateY(-5px); }
