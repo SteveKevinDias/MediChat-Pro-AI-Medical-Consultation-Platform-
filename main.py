@@ -37,8 +37,14 @@ st.set_page_config(
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-* { font-family: 'Inter', sans-serif !important; box-sizing: border-box; }
 
+/* ─ Global reset ─ */
+* {
+    font-family: 'Inter', sans-serif !important;
+    box-sizing: border-box;
+}
+
+/* ─ Background ─ */
 [data-testid="stAppViewContainer"] {
     background: linear-gradient(135deg, #060b18 0%, #0d1b2a 60%, #07101f 100%) !important;
     min-height: 100vh;
@@ -47,78 +53,112 @@ st.markdown("""
 [data-testid="stSidebar"] { display: none !important; }
 section.main > div { padding-top: 0.5rem !important; }
 
-/* ─ Topbar ─ */
+/* ─ Fix Streamlit column gap so content doesn't bleed ─ */
+[data-testid="stColumns"] { gap: 1.25rem !important; align-items: flex-start !important; }
+[data-testid="stColumn"]  { min-width: 0 !important; overflow: hidden; }
+
+/* ─ Global text overflow prevention ─ */
+p, span, div, h1, h2, h3, h4, li {
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    max-width: 100%;
+}
+
+/* ─ Brand topbar ─ */
 .topbar {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 1rem 2rem; border-bottom: 1px solid rgba(255,255,255,0.06);
+    padding: 1rem 2rem;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
     margin-bottom: 1rem;
 }
-.brand { font-size: 1.4rem; font-weight: 800;
+.brand {
+    font-size: 1.4rem; font-weight: 800;
     background: linear-gradient(135deg, #00d4ff, #a855f7);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    white-space: nowrap;
 }
 
 /* ─ Hero ─ */
 .hero { text-align: center; padding: 3.5rem 1rem 2.5rem; }
 .hero h1 {
-    font-size: 4rem; font-weight: 800; line-height: 1.15;
+    font-size: clamp(2.2rem, 5vw, 4rem);
+    font-weight: 800; line-height: 1.2;
     background: linear-gradient(135deg, #00d4ff 20%, #a855f7 80%);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     margin-bottom: 0.75rem;
 }
-.hero p { font-size: 1.15rem; color: #64748b; margin: 0; }
+.hero p { font-size: 1.1rem; color: #64748b; margin: 0; line-height: 1.6; }
 
 /* ─ Portal Cards ─ */
-.portal-grid { display: flex; gap: 1.5rem; padding: 1rem 3rem 3rem; flex-wrap: wrap; }
 .portal-card {
-    flex: 1; min-width: 280px;
     background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 24px; padding: 3rem 2.5rem; text-align: center;
+    border-radius: 24px; padding: 2.5rem 2rem; text-align: center;
     transition: all 0.3s ease; backdrop-filter: blur(20px);
 }
 .portal-card.p-card:hover { border-color: rgba(0,212,255,0.45); box-shadow: 0 0 50px rgba(0,212,255,0.1); transform: translateY(-5px); }
 .portal-card.d-card:hover { border-color: rgba(168,85,247,0.45); box-shadow: 0 0 50px rgba(168,85,247,0.1); transform: translateY(-5px); }
-.portal-icon { font-size: 4.5rem; margin-bottom: 1.25rem; display: block; }
-.portal-title { font-size: 1.6rem; font-weight: 700; color: #f1f5f9; margin-bottom: 0.75rem; }
-.portal-desc  { font-size: 0.95rem; color: #64748b; line-height: 1.7; }
+.portal-icon  { font-size: 4rem; margin-bottom: 1rem; display: block; }
+.portal-title { font-size: 1.5rem; font-weight: 700; color: #f1f5f9; margin-bottom: 0.75rem; }
+.portal-desc  { font-size: 0.925rem; color: #64748b; line-height: 1.7; }
 
 /* ─ Step Indicator ─ */
 .steps {
     display: flex; align-items: center; justify-content: center;
-    gap: 0; padding: 1.5rem 1rem; flex-wrap: wrap;
+    gap: 0; padding: 1.25rem 0.5rem 1.5rem; flex-wrap: wrap; row-gap: 0.75rem;
 }
-.step-wrap { display: flex; align-items: center; }
-.step-dot {
+.step-col  { display: flex; flex-direction: column; align-items: center; }
+.step-dot  {
     width: 34px; height: 34px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
     font-size: 0.8rem; font-weight: 700; border: 2px solid;
-    transition: all 0.3s;
+    transition: all 0.3s; flex-shrink: 0;
 }
 .step-dot.done   { background: #10b981; border-color: #10b981; color: white; }
 .step-dot.active { background: rgba(0,212,255,0.15); border-color: #00d4ff; color: #00d4ff; }
 .step-dot.todo   { background: transparent; border-color: #1e293b; color: #475569; }
-.step-label { font-size: 0.75rem; color: #64748b; margin-top: 0.3rem; white-space: nowrap; }
-.step-col { display: flex; flex-direction: column; align-items: center; }
-.step-line { width: 60px; height: 2px; background: #1e293b; margin: 0 4px; }
+.step-label { font-size: 0.72rem; color: #64748b; margin-top: 0.3rem; white-space: nowrap; }
+.step-line  { width: 48px; height: 2px; background: #1e293b; margin: 0 2px; flex-shrink: 0; }
 .step-line.done { background: #10b981; }
 
-/* ─ Cards ─ */
+/* ─ Content Cards ─ */
 .card {
     background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
-    border-radius: 16px; padding: 1.75rem; margin-bottom: 1.25rem;
+    border-radius: 16px; padding: 1.5rem; margin-bottom: 1.25rem;
+    overflow: hidden;
 }
 .card-cyan   { border-color: rgba(0,212,255,0.25);  background: rgba(0,212,255,0.04); }
 .card-purple { border-color: rgba(168,85,247,0.25); background: rgba(168,85,247,0.04); }
 .card-green  { border-color: rgba(16,185,129,0.25); background: rgba(16,185,129,0.04); }
 .card-orange { border-color: rgba(245,158,11,0.25); background: rgba(245,158,11,0.04); }
 .card-red    { border-color: rgba(239,68,68,0.25);  background: rgba(239,68,68,0.04); }
-.card h3 { font-size: 1rem; font-weight: 600; color: #94a3b8; text-transform: uppercase;
-    letter-spacing: 0.08em; margin-bottom: 0.75rem; }
+
+.card h3 {
+    font-size: 0.85rem; font-weight: 600; color: #94a3b8;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    margin-bottom: 0.75rem; margin-top: 0;
+}
+
+/* ─ Fix markdown heading colors inside cards ─ */
+div[data-testid="stMarkdownContainer"] h1,
+div[data-testid="stMarkdownContainer"] h2,
+div[data-testid="stMarkdownContainer"] h3 {
+    color: #e2e8f0 !important;
+    margin-top: 1rem !important;
+    margin-bottom: 0.5rem !important;
+    line-height: 1.4 !important;
+    font-size: 1rem !important;
+}
+div[data-testid="stMarkdownContainer"] h2 { font-size: 1.05rem !important; }
+div[data-testid="stMarkdownContainer"] p  { color: #cbd5e1; line-height: 1.7; }
+div[data-testid="stMarkdownContainer"] li { color: #cbd5e1; line-height: 1.7; margin-bottom: 0.25rem; }
+div[data-testid="stMarkdownContainer"] strong { color: #f1f5f9 !important; }
 
 /* ─ Badges ─ */
 .badge {
-    display: inline-block; border-radius: 20px;
-    padding: 0.3rem 0.9rem; font-size: 0.8rem; font-weight: 600;
+    display: inline-flex; align-items: center;
+    border-radius: 20px; padding: 0.25rem 0.85rem;
+    font-size: 0.78rem; font-weight: 600;
+    white-space: nowrap; flex-shrink: 0;
 }
 .badge-pending  { background: rgba(245,158,11,0.15); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3); }
 .badge-approved { background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
@@ -127,33 +167,81 @@ section.main > div { padding-top: 0.5rem !important; }
 /* ─ Review Cards ─ */
 .review-card {
     background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 14px; padding: 1.5rem; margin-bottom: 1rem; transition: border-color 0.2s;
+    border-radius: 14px; padding: 1.25rem 1.5rem;
+    margin-bottom: 1rem; transition: border-color 0.2s;
 }
 .review-card:hover { border-color: rgba(255,255,255,0.12); }
-.review-meta { font-size: 0.85rem; color: #64748b; margin-bottom: 0.5rem; }
-.review-complaint { color: #e2e8f0; font-size: 1rem; line-height: 1.6; margin-bottom: 1rem; }
+.review-meta {
+    font-size: 0.82rem; color: #64748b;
+    margin-bottom: 0.6rem; line-height: 1.5;
+    word-break: break-word;
+}
+.review-header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    gap: 0.75rem; margin-bottom: 0.75rem; flex-wrap: wrap;
+}
+.review-patient-info { min-width: 0; flex: 1; }
+.review-patient-name { font-size: 1.05rem; font-weight: 700; color: #f1f5f9; display: block; }
+.review-dob          { font-size: 0.82rem; color: #64748b; display: block; margin-top: 0.1rem; }
+.review-complaint {
+    color: #e2e8f0; font-size: 0.95rem; line-height: 1.65;
+    margin-bottom: 0.75rem; word-break: break-word;
+}
 
-/* ─ Streamlit overrides ─ */
+/* ─ Streamlit form + input overrides ─ */
 .stTextInput > div > div > input,
 .stTextArea > div > div > textarea,
 .stDateInput > div > div > input {
     background: rgba(255,255,255,0.05) !important;
     border: 1px solid rgba(255,255,255,0.1) !important;
-    border-radius: 10px !important; color: #f1f5f9 !important;
+    border-radius: 10px !important;
+    color: #f1f5f9 !important;
+    padding: 0.6rem 0.85rem !important;
+    line-height: 1.5 !important;
 }
 .stButton > button {
     border-radius: 10px !important; font-weight: 600 !important;
     transition: all 0.2s !important; border: none !important;
+    white-space: normal !important; word-wrap: break-word !important;
+    height: auto !important; padding: 0.55rem 1rem !important;
+    line-height: 1.4 !important;
 }
 .stButton > button[kind="primary"] {
     background: linear-gradient(135deg, #00d4ff, #0099cc) !important;
     color: #060b18 !important;
 }
-[data-testid="stForm"] { background: transparent !important; border: none !important; }
-div[data-testid="stMarkdownContainer"] p { color: #cbd5e1; }
-.stSuccess { border-radius: 10px !important; }
-.stWarning { border-radius: 10px !important; }
-.stError   { border-radius: 10px !important; }
+[data-testid="stForm"]   { background: transparent !important; border: none !important; }
+.stSuccess, .stInfo, .stWarning, .stError {
+    border-radius: 10px !important;
+    word-wrap: break-word !important;
+}
+
+/* ─ Expander content ─ */
+[data-testid="stExpander"] summary {
+    font-weight: 600 !important;
+    color: #e2e8f0 !important;
+}
+[data-testid="stExpander"] > div {
+    padding: 1rem 0.75rem !important;
+    overflow-wrap: break-word !important;
+}
+
+/* ─ Metric boxes ─ */
+[data-testid="stMetric"] {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 12px; padding: 1rem !important;
+}
+[data-testid="stMetricLabel"] { color: #94a3b8 !important; font-size: 0.82rem !important; }
+[data-testid="stMetricValue"] { color: #f1f5f9 !important; font-size: 1.6rem !important; }
+
+/* ─ Tab labels ─ */
+[data-testid="stTabs"] [role="tab"] {
+    color: #94a3b8 !important; font-weight: 600 !important;
+    font-size: 0.88rem !important;
+    white-space: nowrap !important;
+}
+[data-testid="stTabs"] [role="tab"][aria-selected="true"] { color: #00d4ff !important; }
 </style>
 """, unsafe_allow_html=True)
 
