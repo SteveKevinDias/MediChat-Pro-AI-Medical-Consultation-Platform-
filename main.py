@@ -506,6 +506,17 @@ def patient_consultation():
                 st.error("Please describe your symptoms before submitting.")
                 return
 
+            # Encode uploaded images FIRST (needed by both AI call and MongoDB save)
+            encoded_images = []
+            if img_files:
+                for img in img_files:
+                    img.seek(0)
+                    encoded_images.append({
+                        "filename":  img.name,
+                        "mime_type": img.type,
+                        "data":      base64.b64encode(img.read()).decode("utf-8"),
+                    })
+
             with st.spinner("🤖 AI is analyzing your case…"):
                 # Build PDF context if vectorstore exists
                 med_context = ""
@@ -524,16 +535,6 @@ def patient_consultation():
                 )
 
             with st.spinner("📤 Sending to doctor queue…"):
-                # Encode any uploaded images as base64 for storage
-                encoded_images = []
-                if img_files:
-                    for img in img_files:
-                        img.seek(0)
-                        encoded_images.append({
-                            "filename":  img.name,
-                            "mime_type": img.type,
-                            "data":      base64.b64encode(img.read()).decode("utf-8"),
-                        })
 
                 rid = save_pending_review(
                     patient_id     = st.session_state.patient_id,
