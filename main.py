@@ -159,9 +159,13 @@ div[data-testid="stMarkdownContainer"] p { color: #cbd5e1; }
 
 
 # ── Resources ──────────────────────────────────────────────────────────────────
+def get_api_key():
+    return st.secrets["OPENAI_API_KEY"]
+
+
 @st.cache_resource
-def load_chat_model():
-    return get_chat_model(st.secrets["EURI_API_KEY"])
+def _dummy_init():
+    return True  # keeps cache_resource pattern for doctor seeding
 
 
 @st.cache_resource
@@ -175,7 +179,8 @@ def init_doctors():
 
 
 init_doctors()
-chat_model = load_chat_model()
+_dummy_init()
+chat_model = get_api_key()  # now just the API key string
 
 
 # ── Session State Defaults ─────────────────────────────────────────────────────
@@ -363,7 +368,7 @@ def patient_history():
     if st.session_state.hist_report is None:
         with st.spinner("Generating your medical history report…"):
             report = generate_patient_history_report(
-                chat_model,
+                st.secrets["OPENAI_API_KEY"],
                 name,
                 st.session_state.summaries,
             )
@@ -525,13 +530,12 @@ def patient_consultation():
                     med_context = "\n\n".join(d.page_content for d in docs)
 
                 ai_resp = generate_ai_diagnosis(
-                    chat_model,
+                    st.secrets["OPENAI_API_KEY"],
                     st.session_state.patient_name,
                     st.session_state.summaries,
                     complaint,
                     med_context,
                     images  = encoded_images,
-                    api_key = st.secrets["EURI_API_KEY"],
                 )
 
             with st.spinner("📤 Sending to doctor queue…"):
@@ -849,7 +853,7 @@ def _save_post_approval_summary(rev: dict, finalized_response: str):
     """Generate and persist a conversation summary after doctor approval."""
     try:
         summary = generate_conversation_summary(
-            chat_model,
+            st.secrets["OPENAI_API_KEY"],
             patient_name       = rev["patient_name"],
             complaint          = rev["complaint"],
             finalized_response = finalized_response,

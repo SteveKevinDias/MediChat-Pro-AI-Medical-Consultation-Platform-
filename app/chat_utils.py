@@ -1,33 +1,36 @@
-from euriai.langchain import create_chat_model
 from openai import OpenAI
 
-MODEL       = "gpt-4.1-nano"
-TEMPERATURE = 0.7
-EURI_BASE_URL = "https://api.euron.one/api/v1/euri"
+MODEL         = "gpt-4o-mini"   # Supports vision + text, cheap and fast
+TEMPERATURE   = 0.7
+OPENAI_BASE   = "https://api.openai.com/v1"
 
 
-def get_chat_model(api_key: str):
-    return create_chat_model(api_key=api_key, model=MODEL, temperature=TEMPERATURE)
+def get_openai_client(api_key: str) -> OpenAI:
+    return OpenAI(api_key=api_key)
 
 
-def ask_chat_model(chat_model, prompt: str) -> str:
-    return chat_model.invoke(prompt).content
+# ── Core call helpers ─────────────────────────────────────────────────────────
+
+def ask_text(api_key: str, prompt: str) -> str:
+    """Simple text-only call."""
+    client = get_openai_client(api_key)
+    resp = client.chat.completions.create(
+        model=MODEL,
+        messages=[{"role": "user", "content": prompt}],
+        temperature=TEMPERATURE,
+    )
+    return resp.choices[0].message.content
 
 
-def get_vision_client(api_key: str) -> OpenAI:
-    """OpenAI-compatible client pointed at EURI's endpoint for multimodal calls."""
-    return OpenAI(api_key=api_key, base_url=EURI_BASE_URL)
-
-
-def ask_vision_model(api_key: str, prompt: str, images: list) -> str:
+def ask_vision(api_key: str, prompt: str, images: list) -> str:
     """
-    Send a text prompt + list of base64 images to gpt-4.1-nano via EURI.
-    Falls back to text-only if vision is not supported by the endpoint.
+    Multimodal call: text + base64 images.
+    images: list of dicts with 'data' (base64 str) and 'mime_type'.
+    Falls back to text-only if images list is empty.
     """
-    client = get_vision_client(api_key)
+    client = get_openai_client(api_key)
 
     if not images:
-        # No images — text-only call
         resp = client.chat.completions.create(
             model=MODEL,
             messages=[{"role": "user", "content": prompt}],
@@ -35,7 +38,7 @@ def ask_vision_model(api_key: str, prompt: str, images: list) -> str:
         )
         return resp.choices[0].message.content
 
-    # Build multimodal content: text + images
+    # Build multimodal message
     content = [{"type": "text", "text": prompt}]
     for img in images:
         mime = img.get("mime_type", "image/jpeg")
@@ -43,33 +46,34 @@ def ask_vision_model(api_key: str, prompt: str, images: list) -> str:
         content.append({
             "type": "image_url",
             "image_url": {
-                "url": f"data:{mime};base64,{data}",
-                "detail": "low",
+                "url":    f"data:{mime};base64,{data}",
+                "detail": "low",   # 85 tokens/image — cheapest, fine for medical photos
             },
         })
 
-    try:
-        # Attempt vision (multimodal) call
-        resp = client.chat.completions.create(
-            model=MODEL,
-            messages=[{"role": "user", "content": content}],
-            temperature=TEMPERATURE,
-        )
-        return resp.choices[0].message.content
-    except Exception:
-        # Vision not supported by this endpoint — fall back to text-only
-        resp = client.chat.completions.create(
-            model=MODEL,
-            messages=[{"role": "user", "content": prompt}],
-            temperature=TEMPERATURE,
-        )
-        return resp.choices[0].message.content
+    resp = client.chat.completions.create(
+        model=MODEL,
+        messages=[{"role": "user", "content": content}],
+        temperature=TEMPERATURE,
+    )
+    return resp.choices[0].message.content
+
+
+# ── Kept for backward compatibility with main.py ──────────────────────────────
+def get_chat_model(api_key: str):
+    """Legacy shim — returns api_key so main.py doesn't need changes."""
+    return api_key
+
+
+def ask_chat_model(chat_model, prompt: str) -> str:
+    """Legacy shim — chat_model is now just the api_key string."""
+    return ask_text(chat_model, prompt)
 
 
 # ── Patient History Report ────────────────────────────────────────────────────
 
 def generate_patient_history_report(
-    chat_model,
+    api_key: str,
     patient_name: str,
     past_summaries: list,
 ) -> str:
@@ -102,23 +106,21 @@ Write a structured **Patient Medical History Report** with these sections:
 Be concise, clinically accurate, and formatted in markdown.
 Do not number visits in the output — write it as a unified report."""
 
-    return ask_chat_model(chat_model, prompt)
+    return ask_text(api_key, prompt)
 
 
 # ── AI Diagnostic Response ────────────────────────────────────────────────────
 
 def generate_ai_diagnosis(
-    chat_model,
+    api_key:           str,
     patient_name:      str,
     past_summaries:    list,
     current_complaint: str,
     medical_context:   str  = "",
     images:            list = None,
-    api_key:           str  = "",
 ) -> str:
     """
-    Generate a diagnostic AI response. Uses vision model when patient
-    has uploaded photos; falls back to text-only otherwise.
+    Generate a diagnostic AI response. Uses vision when images are provided.
     Sent to doctor for review before being shared with the patient.
     """
     history_text = (
@@ -171,7 +173,7 @@ Bullet list of specific warning signs that require urgent care or ER visit.
 2–4 short, actionable self-care steps the patient should follow at home.
 
 ## 🏥 Clinic Visit
-ONLY include this section if a physical examination is truly necessary for diagnosis or treatment (e.g., wound assessment, prescription-only medication, ambiguous physical symptoms).
+ONLY include this section if a physical examination is truly necessary for diagnosis or treatment.
 If not needed, OMIT this section entirely.
 If needed, write: "Please visit the clinic for a physical evaluation — [brief reason why]."
 
@@ -180,16 +182,15 @@ If needed, write: "Please visit the clinic for a physical evaluation — [brief 
 IMPORTANT: This response will be reviewed by a licensed doctor before reaching the patient.
 Be medically precise, direct, and use clear markdown formatting. Avoid vague advice."""
 
-    # Use vision model if images are present, otherwise fallback to text chat
-    if images and api_key:
-        return ask_vision_model(api_key, prompt, images)
-    return ask_chat_model(chat_model, prompt)
+    if images:
+        return ask_vision(api_key, prompt, images)
+    return ask_text(api_key, prompt)
 
 
 # ── Conversation Summary (for MongoDB storage) ────────────────────────────────
 
 def generate_conversation_summary(
-    chat_model,
+    api_key:            str,
     patient_name:       str,
     complaint:          str,
     finalized_response: str,
@@ -212,4 +213,4 @@ Write a 3–5 sentence clinical summary covering:
 
 Write in plain text, third person, no markdown, no bullet points."""
 
-    return ask_chat_model(chat_model, prompt)
+    return ask_text(api_key, prompt)
