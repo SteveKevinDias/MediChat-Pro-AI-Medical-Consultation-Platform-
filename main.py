@@ -38,10 +38,18 @@ st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-/* ─ Global reset ─ */
 * {
-    font-family: 'Inter', sans-serif !important;
     box-sizing: border-box;
+}
+
+/* Base font application without breaking Streamlit icons */
+html, body, div, span, p, h1, h2, h3, h4, h5, h6, li, button, input, label {
+    font-family: 'Inter', sans-serif;
+}
+
+/* Ensure Material Symbols (which Streamlit uses for icons) use their correct font */
+.material-symbols-rounded, [data-testid="stIconMaterial"], [class*="stIcon"] {
+    font-family: 'Material Symbols Rounded' !important;
 }
 
 /* ─ Background ─ */
@@ -55,13 +63,12 @@ section.main > div { padding-top: 0.5rem !important; }
 
 /* ─ Fix Streamlit column gap so content doesn't bleed ─ */
 [data-testid="stColumns"] { gap: 1.25rem !important; align-items: flex-start !important; }
-[data-testid="stColumn"]  { min-width: 0 !important; overflow: hidden; }
+[data-testid="stColumn"]  { min-width: 0 !important; }
 
-/* ─ Global text overflow prevention ─ */
-p, span, div, h1, h2, h3, h4, li {
-    word-wrap: break-word !important;
-    overflow-wrap: break-word !important;
-    max-width: 100%;
+/* ─ Global text wrapping for typography only ─ */
+p, h1, h2, h3, h4, li {
+    word-break: break-word;
+    white-space: pre-wrap;
 }
 
 /* ─ Brand topbar ─ */
@@ -124,7 +131,6 @@ p, span, div, h1, h2, h3, h4, li {
 .card {
     background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
     border-radius: 16px; padding: 1.5rem; margin-bottom: 1.25rem;
-    overflow: hidden;
 }
 .card-cyan   { border-color: rgba(0,212,255,0.25);  background: rgba(0,212,255,0.04); }
 .card-purple { border-color: rgba(168,85,247,0.25); background: rgba(168,85,247,0.04); }
