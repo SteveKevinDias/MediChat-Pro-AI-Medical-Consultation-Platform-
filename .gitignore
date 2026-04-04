@@ -1,0 +1,9 @@
+﻿Chatbot/
+Lib/
+Scripts/
+Include/
+bin/
+obj/
+*.db
+*.log
+__pycache__/
