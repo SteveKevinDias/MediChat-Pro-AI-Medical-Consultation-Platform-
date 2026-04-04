@@ -90,15 +90,15 @@ p, h1, h2, h3, h4, li {
 /* ─ Hero ─ */
 .hero { text-align: center; padding: 3.5rem 1rem 2.5rem; }
 .hero h1 {
-    font-size: clamp(2.8rem, 6vw, 4.8rem);
-    font-weight: 800; line-height: 1.2;
-    background: linear-gradient(135deg, #00d4ff 20%, #a855f7 80%);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    margin-bottom: 0.75rem;
-    text-shadow: 0 0 30px rgba(168, 85, 247, 0.2);
-    letter-spacing: -0.03em;
+    font-size: clamp(3.2rem, 8vw, 5.5rem) !important;
+    font-weight: 900 !important; line-height: 1.1 !important;
+    background: linear-gradient(135deg, #00d4ff 20%, #a855f7 80%) !important;
+    -webkit-background-clip: text !important; -webkit-text-fill-color: transparent !important; background-clip: text !important;
+    margin: 0 0 1rem 0 !important;
+    text-shadow: 0 0 40px rgba(168, 85, 247, 0.3) !important;
+    letter-spacing: -0.04em !important;
 }
-.hero p { font-size: 1.2rem; color: #94a3b8; margin: 0; line-height: 1.6; }
+.hero p { font-size: 1.3rem !important; color: #94a3b8 !important; margin: 0 !important; line-height: 1.6 !important; }
 
 /* ─ Portal Cards ─ */
 .portal-card {
