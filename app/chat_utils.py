@@ -3,7 +3,7 @@ from openai import OpenAI
 
 MODEL       = "gpt-4.1-nano"
 TEMPERATURE = 0.7
-EURI_BASE_URL = "https://api.euron.one/api/v1/euri/v1"
+EURI_BASE_URL = "https://api.euron.one/api/v1/euri"
 
 
 def get_chat_model(api_key: str):
@@ -22,12 +22,12 @@ def get_vision_client(api_key: str) -> OpenAI:
 def ask_vision_model(api_key: str, prompt: str, images: list) -> str:
     """
     Send a text prompt + list of base64 images to gpt-4.1-nano via EURI.
-    images: list of dicts with keys 'data' (base64 str) and 'mime_type'.
-    Falls back to text-only if images list is empty.
+    Falls back to text-only if vision is not supported by the endpoint.
     """
+    client = get_vision_client(api_key)
+
     if not images:
-        # No images — use regular chat model
-        client = get_vision_client(api_key)
+        # No images — text-only call
         resp = client.chat.completions.create(
             model=MODEL,
             messages=[{"role": "user", "content": prompt}],
@@ -35,26 +35,35 @@ def ask_vision_model(api_key: str, prompt: str, images: list) -> str:
         )
         return resp.choices[0].message.content
 
-    # Build multimodal content list: text first, then images
+    # Build multimodal content: text + images
     content = [{"type": "text", "text": prompt}]
     for img in images:
-        mime  = img.get("mime_type", "image/jpeg")
-        data  = img["data"]
+        mime = img.get("mime_type", "image/jpeg")
+        data = img["data"]
         content.append({
             "type": "image_url",
             "image_url": {
                 "url": f"data:{mime};base64,{data}",
-                "detail": "low",   # low = 85 tokens flat → cheapest, fine for medical photos
+                "detail": "low",
             },
         })
 
-    client = get_vision_client(api_key)
-    resp = client.chat.completions.create(
-        model=MODEL,
-        messages=[{"role": "user", "content": content}],
-        temperature=TEMPERATURE,
-    )
-    return resp.choices[0].message.content
+    try:
+        # Attempt vision (multimodal) call
+        resp = client.chat.completions.create(
+            model=MODEL,
+            messages=[{"role": "user", "content": content}],
+            temperature=TEMPERATURE,
+        )
+        return resp.choices[0].message.content
+    except Exception:
+        # Vision not supported by this endpoint — fall back to text-only
+        resp = client.chat.completions.create(
+            model=MODEL,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=TEMPERATURE,
+        )
+        return resp.choices[0].message.content
 
 
 # ── Patient History Report ────────────────────────────────────────────────────
