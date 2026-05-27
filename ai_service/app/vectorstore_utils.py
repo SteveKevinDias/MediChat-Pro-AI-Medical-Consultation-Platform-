@@ -3,7 +3,6 @@ import shutil
 import hashlib
 from typing import List
 
-import streamlit as st
 from langchain_community.vectorstores import FAISS
 from langchain_community.embeddings import HuggingFaceEmbeddings
 
@@ -44,14 +43,14 @@ def create_faiss_index(texts: List[str], session_id: str) -> FAISS:
             old_hash = f.read().strip()
 
         if new_hash == old_hash:
-            st.success("✅ Existing embeddings reused (no re-processing needed)")
+            print("✅ Existing embeddings reused (no re-processing needed)")
             return FAISS.load_local(
                 session_dir,
                 embeddings,
                 allow_dangerous_deserialization=True,
             )
 
-        st.info("🔄 Updated documents detected — rebuilding embeddings…")
+        print("🔄 Updated documents detected — rebuilding embeddings…")
 
     # ── Build fresh index ─────────────────────────────────────────────────────
     vectorstore = FAISS.from_texts(texts, embeddings)
@@ -62,6 +61,16 @@ def create_faiss_index(texts: List[str], session_id: str) -> FAISS:
 
     return vectorstore
 
+def load_faiss_index(session_id: str) -> FAISS:
+    session_dir = _session_path(session_id)
+    index_path = os.path.join(session_dir, "index.faiss")
+    if os.path.exists(index_path):
+        return FAISS.load_local(
+            session_dir,
+            embeddings,
+            allow_dangerous_deserialization=True,
+        )
+    return None
 
 def retrieve_similar_documents(vectorstore: FAISS, query: str, k: int = 4):
     """Similarity search — no embedding needed, just vector lookup."""

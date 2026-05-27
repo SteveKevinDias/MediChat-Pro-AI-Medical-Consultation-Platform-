@@ -2,7 +2,8 @@
 
 > An intelligent, human-in-the-loop medical consultation platform where patients describe their symptoms and receive AI-generated diagnoses reviewed and approved by a licensed doctor before delivery.
 
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://your-app-url.streamlit.app)
+![React](https://img.shields.io/badge/React-18-blue?logo=react)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688?logo=fastapi)
 ![Python](https://img.shields.io/badge/Python-3.10+-blue?logo=python)
 ![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-green?logo=mongodb)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
@@ -40,18 +41,17 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                         Streamlit UI                            │
+│                         React Frontend (Vite)                   │
 │   ┌──────────────────┐           ┌───────────────────────────┐  │
 │   │  Patient Portal  │           │    Doctor Dashboard       │  │
-│   │  (4-step flow)   │           │  (Approve / Edit / Reject)│  │
+│   │  (React UI)      │           │  (Approve / Edit / Reject)│  │
 │   └────────┬─────────┘           └────────────┬──────────────┘  │
 └────────────┼────────────────────────────────── ┼ ───────────────┘
-             │                                   │
+             │           REST API (JSON)         │
      ┌───────▼──────────────────────────────────▼───────┐
-     │                  app/ (Python modules)            │
-     │  chat_utils.py  │  mongo_utils.py  │  pdf_utils  │
-     │  vectorstore    │  (AI prompts,    │  (extract   │
-     │  _utils.py      │   vision model)  │   PDF text) │
+     │                  FastAPI Backend                 │
+     │  routes_patient.py │  routes_doctor.py           │
+     │  chat_utils.py     │  mongo_utils.py  │ pdf_utils│
      └────────┬─────────────────┬──────────────┬────────┘
               │                 │              │
      ┌────────▼──────┐  ┌───────▼─────┐ ┌────▼──────────┐
@@ -84,7 +84,8 @@ Patient submits complaint + photos
 
 | Layer | Technology |
 |---|---|
-| **Frontend / App** | Streamlit |
+| **Frontend** | React, Vite |
+| **Backend** | FastAPI (Python) |
 | **AI Model** | GPT-4.1-nano via EURI AI (OpenAI-compatible API) |
 | **Vision AI** | Multimodal GPT-4.1-nano (base64 image input) |
 | **Embeddings** | `sentence-transformers/all-mpnet-base-v2` (HuggingFace) |
@@ -92,7 +93,6 @@ Patient submits complaint + photos
 | **Database** | MongoDB Atlas |
 | **PDF Processing** | pypdf |
 | **LLM Framework** | LangChain |
-| **Deployment** | Streamlit Community Cloud |
 
 ---
 
@@ -100,17 +100,23 @@ Patient submits complaint + photos
 
 ```
 medichat_pro/
-├── main.py                    # Main Streamlit app (UI + routing)
-├── requirements.txt
-├── .streamlit/
-│   └── secrets.toml           # API keys & doctor credentials
-├── app/
-│   ├── chat_utils.py          # AI model, vision model, prompts
-│   ├── mongo_utils.py         # MongoDB CRUD operations
-│   ├── vectorstore_utils.py   # FAISS index management (per-session)
-│   └── pdf_utils.py           # PDF text extraction
-└── sample_data/
-    └── medical_history_1.pdf  # Sample PDF for testing
+├── ai_service/                # FastAPI Backend
+│   ├── app/
+│   │   ├── chat_utils.py      # AI model, vision model, prompts
+│   │   ├── mongo_utils.py     # MongoDB CRUD operations
+│   │   ├── vectorstore_utils.py # FAISS index management
+│   │   └── pdf_utils.py       # PDF text extraction
+│   ├── main.py                # FastAPI app & routing
+│   ├── routes_doctor.py
+│   ├── routes_patient.py
+│   └── requirements.txt
+├── frontend/                  # React Frontend
+│   ├── public/
+│   ├── src/
+│   ├── package.json
+│   └── vite.config.js
+├── sample_data/               # Sample medical history PDFs
+└── README.md                  # Project documentation
 ```
 
 ---
@@ -123,26 +129,28 @@ git clone https://github.com/yourusername/medichat-pro.git
 cd medichat-pro
 ```
 
-### 2. Install dependencies
+### 2. Configure Environment Variables
+In the `ai_service` directory, create a `.env` file:
+```env
+OPENAI_API_KEY=your-euri-api-key
+MONGO_URI=mongodb+srv://user:password@cluster.mongodb.net/
+```
+
+### 3. Start the Backend (FastAPI)
 ```bash
+cd ai_service
 pip install -r requirements.txt
+python main.py
+# Backend will run on http://localhost:8000
 ```
 
-### 3. Configure secrets
-
-Create `.streamlit/secrets.toml`:
-```toml
-EURI_API_KEY = "your-euri-api-key"
-MONGO_URI    = "mongodb+srv://user:password@cluster.mongodb.net/"
-
-[doctors]
-dr_smith = "password123"
-dr_jones = "securepassword"
-```
-
-### 4. Run the app
+### 4. Start the Frontend (React)
+Open a new terminal window:
 ```bash
-streamlit run main.py
+cd frontend
+npm install
+npm run dev
+# Frontend will run on http://localhost:5173
 ```
 
 ---
@@ -151,9 +159,8 @@ streamlit run main.py
 
 | Key | Description | Where to get |
 |---|---|---|
-| `EURI_API_KEY` | EURI AI API key for GPT-4.1-nano | [euri.ai](https://euri.ai) |
+| `OPENAI_API_KEY` | EURI AI API key for GPT-4.1-nano | [euri.ai](https://euri.ai) |
 | `MONGO_URI` | MongoDB Atlas connection string | [mongodb.com/atlas](https://mongodb.com/atlas) |
-| `doctors.*` | Doctor login credentials (username: password) | Set manually in secrets |
 
 ---
 
@@ -168,39 +175,24 @@ streamlit run main.py
 
 ---
 
-## 🧠 AI Response Structure
-
-Every AI-generated diagnosis follows this structured format:
-
-```
-🩺 Assessment        — What is likely going on
-🔍 Likely Diagnosis  — Top 1-3 conditions ranked by probability
-💊 Medications       — Drug · dose · frequency · duration
-🧪 Tests             — Only if genuinely needed
-⚠️ Red Flags         — When to seek emergency care
-📋 Care Instructions — Actionable home-care steps
-🏥 Clinic Visit      — Only included if physical exam is required
-```
-
----
-
 ## 🔒 Security Notes
 
 - Patient identity is verified by name + date of birth combination
 - Doctor passwords are stored as SHA-256 hashes in MongoDB
 - Patients **never** see raw AI output — all responses are doctor-verified first
-- Per-session FAISS indexes are automatically deleted after submission
+- Per-session FAISS indexes are automatically cleaned up
 
 ---
 
-## 📈 Future Improvements
+## 📈 Future Improvements (Scaling)
 
 - [ ] OTP-based patient authentication
-- [ ] Email/SMS notifications on doctor approval
-- [ ] GridFS/S3 for large image storage
+- [ ] Migrate from local FAISS to managed Vector DB (e.g., Pinecone)
+- [ ] Add Redis caching for session data and summaries
+- [ ] Message queue (Celery/RabbitMQ) for async LLM generation
+- [ ] Migrate image/PDF storage to AWS S3
+- [ ] Containerize and deploy via Docker/Kubernetes
 - [ ] Unit and integration tests
-- [ ] Admin panel for hospital management
-- [ ] Audit logging for HIPAA compliance
 
 ---
 

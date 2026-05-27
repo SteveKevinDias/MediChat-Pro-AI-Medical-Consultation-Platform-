@@ -2,13 +2,22 @@ from pymongo import MongoClient
 from datetime import datetime
 import hashlib
 import uuid
-import streamlit as st
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
 
-@st.cache_resource
+_mongo_client = None
+
 def _get_mongo_client():
     """Single cached MongoClient — shared connection pool across all requests."""
-    return MongoClient(st.secrets["MONGO_URI"])
+    global _mongo_client
+    if _mongo_client is None:
+        mongo_uri = os.getenv("MONGO_URI")
+        if not mongo_uri:
+            raise ValueError("MONGO_URI not found in environment")
+        _mongo_client = MongoClient(mongo_uri)
+    return _mongo_client
 
 
 def get_db():
@@ -84,6 +93,7 @@ def save_pending_review(
     ai_response:    str,
     history_report: str,
     images:         list = None,
+    pdf_files:      list = None,
 ) -> str:
     """Insert a new pending review document. Returns review_id."""
     db = get_db()
@@ -98,6 +108,7 @@ def save_pending_review(
         "ai_response":        ai_response,
         "history_report":     history_report,
         "images":             images or [],
+        "pdf_files":          pdf_files or [],
         "status":             "pending",
         "created_at":         datetime.utcnow(),
         "reviewed_at":        None,

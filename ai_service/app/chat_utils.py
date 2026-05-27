@@ -214,3 +214,25 @@ Write a 3–5 sentence clinical summary covering:
 Write in plain text, third person, no markdown, no bullet points."""
 
     return ask_text(api_key, prompt)
+
+# ── Document Q&A (Doctor Dashboard) ──────────────────────────────────────────
+
+def answer_doctor_question(api_key: str, question: str, context: str) -> str:
+    """
+    Answer a doctor's question based strictly on the retrieved PDF context.
+    """
+    if not context:
+        return "I could not find any relevant information in the attached documents regarding your question."
+
+    prompt = f"""You are a medical AI assistant helping a doctor review a patient's uploaded medical documents.
+
+RELEVANT DOCUMENT EXCERPTS:
+{context}
+
+DOCTOR'S QUESTION:
+{question}
+
+Based strictly on the excerpts above, provide a precise, concise, and clinically relevant answer to the doctor. 
+If the answer is not in the text, state that explicitly. Do not make up information."""
+
+    return ask_text(api_key, prompt)

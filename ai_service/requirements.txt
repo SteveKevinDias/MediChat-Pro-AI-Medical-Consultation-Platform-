@@ -1,5 +1,7 @@
 # ── Web framework ────────────────────────────────────────────────────────────
-streamlit
+fastapi
+uvicorn
+python-multipart
 
 # ── PDF processing ───────────────────────────────────────────────────────────
 pypdf
@@ -20,6 +22,13 @@ openai
 # ── MongoDB ──────────────────────────────────────────────────────────────────
 pymongo
 
+# ── Scaling & Architecture (New) ─────────────────────────────────────────────
+redis
+celery
+pika
+boto3
+
 # ── Utilities ────────────────────────────────────────────────────────────────
 numpy
 pandas
+python-dotenv

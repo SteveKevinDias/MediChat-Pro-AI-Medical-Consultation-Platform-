@@ -9,3 +9,4 @@ obj/
 __pycache__/
 .streamlit/secrets.toml
 vector_db/
+.env
